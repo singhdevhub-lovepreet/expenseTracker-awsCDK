@@ -12,31 +12,22 @@ export class ExpenseTrackerServicesDeployStack extends cdk.Stack {
       cidr: "10.0.0.0/16",
       maxAzs: 2,
       natGateways: 2,
+      createInternetGateway: false, 
       subnetConfiguration: [
         {
           cidrMask: 24,
-          name: 'public-subnet-1',
+          name: 'public-subnet',
           subnetType: SubnetType.PUBLIC,
         },
         {
           cidrMask: 24,
-          name: 'public-subnet-2',
-          subnetType: SubnetType.PUBLIC,
-        },
-        {
-          cidrMask: 24,
-          name: 'private-subnet-1',
-          subnetType: SubnetType.PRIVATE_WITH_EGRESS,
-        },
-        {
-          cidrMask: 24,
-          name: 'private-subnet-2',
+          name: 'private-subnet',
           subnetType: SubnetType.PRIVATE_WITH_EGRESS,
         }
       ]
     });
 
-    // Internet Gateway for public subnets
+
     const internetGateway = new CfnInternetGateway(this, 'InternetGateway');
     new CfnVPCGatewayAttachment(this, 'MyUniqueVPCGatewayAttachment', {
       vpcId: vpc.vpcId,
@@ -46,12 +37,12 @@ export class ExpenseTrackerServicesDeployStack extends cdk.Stack {
     // NAT Gateways
     const natGatewayOne = new CfnNatGateway(this, 'NatGatewayOne', {
       subnetId: vpc.publicSubnets[0].subnetId,
-      allocationId: new CfnEIP(this, 'EIPForNatGatewayOne').ref, // Correct use of EIP reference
+      allocationId: new CfnEIP(this, 'EIPForNatGatewayOne').attrAllocationId,
     });
 
     const natGatewayTwo = new CfnNatGateway(this, 'NatGatewayTwo', {
       subnetId: vpc.publicSubnets[1].subnetId,
-      allocationId: new CfnEIP(this, 'EIPForNatGatewayTwo').ref,
+      allocationId: new CfnEIP(this, 'EIPForNatGatewayTwo').attrAllocationId,
     });
 
     // Route for private subnets to NAT Gateways
@@ -68,7 +59,7 @@ export class ExpenseTrackerServicesDeployStack extends cdk.Stack {
       new CfnRoute(this, `PublicRouteToInternetGateway-${index}`, {
         routeTableId: subnet.routeTable.routeTableId,
         destinationCidrBlock: '0.0.0.0/0',
-        gatewayId: internetGateway.ref,
+        gatewayId: internetGateway.ref
       });
     });
 
