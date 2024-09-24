@@ -1,0 +1,910 @@
+Resources:
+  myVPC01512990:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: expenseTracker
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/Resource
+  myVPCpublicsubnet1Subnet1SubnetF979D130:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs: ""
+      CidrBlock: 10.0.0.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: aws-cdk:subnet-name
+          Value: public-subnet-1
+        - Key: aws-cdk:subnet-type
+          Value: Public
+        - Key: Name
+          Value: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-1Subnet1
+      VpcId:
+        Ref: myVPC01512990
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-1Subnet1/Subnet
+  myVPCpublicsubnet1Subnet1RouteTable7B3E4E59:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-1Subnet1
+      VpcId:
+        Ref: myVPC01512990
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-1Subnet1/RouteTable
+  myVPCpublicsubnet1Subnet1RouteTableAssociation4B7D3635:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: myVPCpublicsubnet1Subnet1RouteTable7B3E4E59
+      SubnetId:
+        Ref: myVPCpublicsubnet1Subnet1SubnetF979D130
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-1Subnet1/RouteTableAssociation
+  myVPCpublicsubnet1Subnet1DefaultRouteDC512F50:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: myVPCIGW5063090B
+      RouteTableId:
+        Ref: myVPCpublicsubnet1Subnet1RouteTable7B3E4E59
+    DependsOn:
+      - myVPCVPCGW2EC4F0BF
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-1Subnet1/DefaultRoute
+  myVPCpublicsubnet1Subnet1EIP80222C5D:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-1Subnet1
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-1Subnet1/EIP
+  myVPCpublicsubnet1Subnet1NATGateway79C78E1E:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+          - myVPCpublicsubnet1Subnet1EIP80222C5D
+          - AllocationId
+      SubnetId:
+        Ref: myVPCpublicsubnet1Subnet1SubnetF979D130
+      Tags:
+        - Key: Name
+          Value: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-1Subnet1
+    DependsOn:
+      - myVPCpublicsubnet1Subnet1DefaultRouteDC512F50
+      - myVPCpublicsubnet1Subnet1RouteTableAssociation4B7D3635
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-1Subnet1/NATGateway
+  myVPCpublicsubnet1Subnet2Subnet9D46C69E:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: aws-cdk:subnet-name
+          Value: public-subnet-1
+        - Key: aws-cdk:subnet-type
+          Value: Public
+        - Key: Name
+          Value: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-1Subnet2
+      VpcId:
+        Ref: myVPC01512990
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-1Subnet2/Subnet
+  myVPCpublicsubnet1Subnet2RouteTableCBB2544F:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-1Subnet2
+      VpcId:
+        Ref: myVPC01512990
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-1Subnet2/RouteTable
+  myVPCpublicsubnet1Subnet2RouteTableAssociationD21D6ECD:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: myVPCpublicsubnet1Subnet2RouteTableCBB2544F
+      SubnetId:
+        Ref: myVPCpublicsubnet1Subnet2Subnet9D46C69E
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-1Subnet2/RouteTableAssociation
+  myVPCpublicsubnet1Subnet2DefaultRoute87F67323:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: myVPCIGW5063090B
+      RouteTableId:
+        Ref: myVPCpublicsubnet1Subnet2RouteTableCBB2544F
+    DependsOn:
+      - myVPCVPCGW2EC4F0BF
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-1Subnet2/DefaultRoute
+  myVPCpublicsubnet1Subnet2EIP6EDC831F:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-1Subnet2
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-1Subnet2/EIP
+  myVPCpublicsubnet1Subnet2NATGatewayC68A417D:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+          - myVPCpublicsubnet1Subnet2EIP6EDC831F
+          - AllocationId
+      SubnetId:
+        Ref: myVPCpublicsubnet1Subnet2Subnet9D46C69E
+      Tags:
+        - Key: Name
+          Value: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-1Subnet2
+    DependsOn:
+      - myVPCpublicsubnet1Subnet2DefaultRoute87F67323
+      - myVPCpublicsubnet1Subnet2RouteTableAssociationD21D6ECD
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-1Subnet2/NATGateway
+  myVPCpublicsubnet2Subnet1Subnet46D7E973:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs: ""
+      CidrBlock: 10.0.2.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: aws-cdk:subnet-name
+          Value: public-subnet-2
+        - Key: aws-cdk:subnet-type
+          Value: Public
+        - Key: Name
+          Value: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-2Subnet1
+      VpcId:
+        Ref: myVPC01512990
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-2Subnet1/Subnet
+  myVPCpublicsubnet2Subnet1RouteTableC1316874:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-2Subnet1
+      VpcId:
+        Ref: myVPC01512990
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-2Subnet1/RouteTable
+  myVPCpublicsubnet2Subnet1RouteTableAssociation756091EC:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: myVPCpublicsubnet2Subnet1RouteTableC1316874
+      SubnetId:
+        Ref: myVPCpublicsubnet2Subnet1Subnet46D7E973
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-2Subnet1/RouteTableAssociation
+  myVPCpublicsubnet2Subnet1DefaultRoute82D41F54:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: myVPCIGW5063090B
+      RouteTableId:
+        Ref: myVPCpublicsubnet2Subnet1RouteTableC1316874
+    DependsOn:
+      - myVPCVPCGW2EC4F0BF
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-2Subnet1/DefaultRoute
+  myVPCpublicsubnet2Subnet2SubnetB0CEA5A0:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      CidrBlock: 10.0.3.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: aws-cdk:subnet-name
+          Value: public-subnet-2
+        - Key: aws-cdk:subnet-type
+          Value: Public
+        - Key: Name
+          Value: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-2Subnet2
+      VpcId:
+        Ref: myVPC01512990
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-2Subnet2/Subnet
+  myVPCpublicsubnet2Subnet2RouteTable7D2277A9:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-2Subnet2
+      VpcId:
+        Ref: myVPC01512990
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-2Subnet2/RouteTable
+  myVPCpublicsubnet2Subnet2RouteTableAssociationA5711911:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: myVPCpublicsubnet2Subnet2RouteTable7D2277A9
+      SubnetId:
+        Ref: myVPCpublicsubnet2Subnet2SubnetB0CEA5A0
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-2Subnet2/RouteTableAssociation
+  myVPCpublicsubnet2Subnet2DefaultRoute1066A84C:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: myVPCIGW5063090B
+      RouteTableId:
+        Ref: myVPCpublicsubnet2Subnet2RouteTable7D2277A9
+    DependsOn:
+      - myVPCVPCGW2EC4F0BF
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/public-subnet-2Subnet2/DefaultRoute
+  myVPCprivatesubnet1Subnet1Subnet4FD292CB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs: ""
+      CidrBlock: 10.0.4.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: aws-cdk:subnet-name
+          Value: private-subnet-1
+        - Key: aws-cdk:subnet-type
+          Value: Private
+        - Key: Name
+          Value: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-1Subnet1
+      VpcId:
+        Ref: myVPC01512990
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-1Subnet1/Subnet
+  myVPCprivatesubnet1Subnet1RouteTableF92F70BC:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-1Subnet1
+      VpcId:
+        Ref: myVPC01512990
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-1Subnet1/RouteTable
+  myVPCprivatesubnet1Subnet1RouteTableAssociation3C19CF63:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: myVPCprivatesubnet1Subnet1RouteTableF92F70BC
+      SubnetId:
+        Ref: myVPCprivatesubnet1Subnet1Subnet4FD292CB
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-1Subnet1/RouteTableAssociation
+  myVPCprivatesubnet1Subnet1DefaultRouteD09CB15F:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: myVPCpublicsubnet1Subnet1NATGateway79C78E1E
+      RouteTableId:
+        Ref: myVPCprivatesubnet1Subnet1RouteTableF92F70BC
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-1Subnet1/DefaultRoute
+  myVPCprivatesubnet1Subnet2Subnet5365E391:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      CidrBlock: 10.0.5.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: aws-cdk:subnet-name
+          Value: private-subnet-1
+        - Key: aws-cdk:subnet-type
+          Value: Private
+        - Key: Name
+          Value: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-1Subnet2
+      VpcId:
+        Ref: myVPC01512990
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-1Subnet2/Subnet
+  myVPCprivatesubnet1Subnet2RouteTable4C320CB9:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-1Subnet2
+      VpcId:
+        Ref: myVPC01512990
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-1Subnet2/RouteTable
+  myVPCprivatesubnet1Subnet2RouteTableAssociation06FECF83:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: myVPCprivatesubnet1Subnet2RouteTable4C320CB9
+      SubnetId:
+        Ref: myVPCprivatesubnet1Subnet2Subnet5365E391
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-1Subnet2/RouteTableAssociation
+  myVPCprivatesubnet1Subnet2DefaultRouteF1649174:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: myVPCpublicsubnet1Subnet2NATGatewayC68A417D
+      RouteTableId:
+        Ref: myVPCprivatesubnet1Subnet2RouteTable4C320CB9
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-1Subnet2/DefaultRoute
+  myVPCprivatesubnet2Subnet1SubnetA7160C7F:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs: ""
+      CidrBlock: 10.0.6.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: aws-cdk:subnet-name
+          Value: private-subnet-2
+        - Key: aws-cdk:subnet-type
+          Value: Private
+        - Key: Name
+          Value: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-2Subnet1
+      VpcId:
+        Ref: myVPC01512990
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-2Subnet1/Subnet
+  myVPCprivatesubnet2Subnet1RouteTable8B984002:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-2Subnet1
+      VpcId:
+        Ref: myVPC01512990
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-2Subnet1/RouteTable
+  myVPCprivatesubnet2Subnet1RouteTableAssociation5CE15E8C:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: myVPCprivatesubnet2Subnet1RouteTable8B984002
+      SubnetId:
+        Ref: myVPCprivatesubnet2Subnet1SubnetA7160C7F
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-2Subnet1/RouteTableAssociation
+  myVPCprivatesubnet2Subnet1DefaultRouteD1EDB22E:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: myVPCpublicsubnet1Subnet1NATGateway79C78E1E
+      RouteTableId:
+        Ref: myVPCprivatesubnet2Subnet1RouteTable8B984002
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-2Subnet1/DefaultRoute
+  myVPCprivatesubnet2Subnet2Subnet0F84807C:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      CidrBlock: 10.0.7.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: aws-cdk:subnet-name
+          Value: private-subnet-2
+        - Key: aws-cdk:subnet-type
+          Value: Private
+        - Key: Name
+          Value: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-2Subnet2
+      VpcId:
+        Ref: myVPC01512990
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-2Subnet2/Subnet
+  myVPCprivatesubnet2Subnet2RouteTableBDE2C9B5:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-2Subnet2
+      VpcId:
+        Ref: myVPC01512990
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-2Subnet2/RouteTable
+  myVPCprivatesubnet2Subnet2RouteTableAssociation852D7732:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: myVPCprivatesubnet2Subnet2RouteTableBDE2C9B5
+      SubnetId:
+        Ref: myVPCprivatesubnet2Subnet2Subnet0F84807C
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-2Subnet2/RouteTableAssociation
+  myVPCprivatesubnet2Subnet2DefaultRoute714F388C:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: myVPCpublicsubnet1Subnet2NATGatewayC68A417D
+      RouteTableId:
+        Ref: myVPCprivatesubnet2Subnet2RouteTableBDE2C9B5
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/private-subnet-2Subnet2/DefaultRoute
+  myVPCIGW5063090B:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: expenseTracker
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/IGW
+  myVPCVPCGW2EC4F0BF:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId:
+        Ref: myVPCIGW5063090B
+      VpcId:
+        Ref: myVPC01512990
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/VPCGW
+  myVPCRestrictDefaultSecurityGroupCustomResourceF0D6E4AC:
+    Type: Custom::VpcRestrictDefaultSG
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+          - CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E
+          - Arn
+      DefaultSecurityGroupId:
+        Fn::GetAtt:
+          - myVPC01512990
+          - DefaultSecurityGroup
+      Account:
+        Ref: AWS::AccountId
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/myVPC/RestrictDefaultSecurityGroupCustomResource/Default
+  CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+      ManagedPolicyArns:
+        - Fn::Sub: arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: Inline
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:AuthorizeSecurityGroupIngress
+                  - ec2:AuthorizeSecurityGroupEgress
+                  - ec2:RevokeSecurityGroupIngress
+                  - ec2:RevokeSecurityGroupEgress
+                Resource:
+                  - Fn::Join:
+                      - ""
+                      - - "arn:"
+                        - Ref: AWS::Partition
+                        - ":ec2:"
+                        - Ref: AWS::Region
+                        - ":"
+                        - Ref: AWS::AccountId
+                        - :security-group/
+                        - Fn::GetAtt:
+                            - myVPC01512990
+                            - DefaultSecurityGroup
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Role
+  CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket:
+          Fn::Sub: cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}
+        S3Key: ee7de53d64cc9d6248fa6aa550f92358f6c907b5efd6f3298aeab1b5e7ea358a.zip
+      Timeout: 900
+      MemorySize: 128
+      Handler: __entrypoint__.handler
+      Role:
+        Fn::GetAtt:
+          - CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0
+          - Arn
+      Runtime:
+        Fn::FindInMap:
+          - LatestNodeRuntimeMap
+          - Ref: AWS::Region
+          - value
+      Description: Lambda function for removing all inbound/outbound rules from the VPC default security group
+    DependsOn:
+      - CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Handler
+      aws:asset:path: asset.ee7de53d64cc9d6248fa6aa550f92358f6c907b5efd6f3298aeab1b5e7ea358a
+      aws:asset:property: Code
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/InternetGateway
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId:
+        Ref: InternetGateway
+      VpcId:
+        Ref: myVPC01512990
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/VPCGatewayAttachment
+  EIPForNatGatewayOne:
+    Type: AWS::EC2::EIP
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/EIPForNatGatewayOne
+  NatGatewayOne:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Ref: EIPForNatGatewayOne
+      SubnetId:
+        Ref: myVPCpublicsubnet1Subnet1SubnetF979D130
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/NatGatewayOne
+  EIPForNatGatewayTwo:
+    Type: AWS::EC2::EIP
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/EIPForNatGatewayTwo
+  NatGatewayTwo:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Ref: EIPForNatGatewayTwo
+      SubnetId:
+        Ref: myVPCpublicsubnet1Subnet2Subnet9D46C69E
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/NatGatewayTwo
+  PrivateRouteToNatGateway0:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: NatGatewayOne
+      RouteTableId:
+        Ref: myVPCprivatesubnet1Subnet1RouteTableF92F70BC
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/PrivateRouteToNatGateway-0
+  PrivateRouteToNatGateway1:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: NatGatewayTwo
+      RouteTableId:
+        Ref: myVPCprivatesubnet1Subnet2RouteTable4C320CB9
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/PrivateRouteToNatGateway-1
+  PrivateRouteToNatGateway2:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: NatGatewayTwo
+      RouteTableId:
+        Ref: myVPCprivatesubnet2Subnet1RouteTable8B984002
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/PrivateRouteToNatGateway-2
+  PrivateRouteToNatGateway3:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: NatGatewayTwo
+      RouteTableId:
+        Ref: myVPCprivatesubnet2Subnet2RouteTableBDE2C9B5
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/PrivateRouteToNatGateway-3
+  PublicRouteToInternetGateway0:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: InternetGateway
+      RouteTableId:
+        Ref: myVPCpublicsubnet1Subnet1RouteTable7B3E4E59
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/PublicRouteToInternetGateway-0
+  PublicRouteToInternetGateway1:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: InternetGateway
+      RouteTableId:
+        Ref: myVPCpublicsubnet1Subnet2RouteTableCBB2544F
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/PublicRouteToInternetGateway-1
+  PublicRouteToInternetGateway2:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: InternetGateway
+      RouteTableId:
+        Ref: myVPCpublicsubnet2Subnet1RouteTableC1316874
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/PublicRouteToInternetGateway-2
+  PublicRouteToInternetGateway3:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: InternetGateway
+      RouteTableId:
+        Ref: myVPCpublicsubnet2Subnet2RouteTable7D2277A9
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/PublicRouteToInternetGateway-3
+  CDKMetadata:
+    Type: AWS::CDK::Metadata
+    Properties:
+      Analytics: v2:deflate64:H4sIAAAAAAAA/12QQU/DMAyFf8vuaWCVEOI4KjTtAEQd2hW5qTe8tU6VOJ3QtP9OugFBnPz56cl+dqnndw96PoNjKGx7KDpq9GktYA8qSe9oS33aDFZVW96YSpnYdGTXsWGUSctUuyj4Bk2HWc/aIgRnCYQc/5oneFqZqbyALEHwCJ/KeBoT5sErFvSJfwzXJN/dQlLUjx5ZzqrG4KK3aW4M4vrcpn1/+BmGgXj3z2W8G6lF/wgBVUqLkp6wu/i2/BpliJcwleOWpivOil2Leh9uxrLU9/p2tg9EhY8s1KOur/ULcbt3+V4BAAA=
+    Metadata:
+      aws:cdk:path: ExpenseTrackerServicesDeployStack/CDKMetadata/Default
+    Condition: CDKMetadataAvailable
+Mappings:
+  LatestNodeRuntimeMap:
+    af-south-1:
+      value: nodejs20.x
+    ap-east-1:
+      value: nodejs20.x
+    ap-northeast-1:
+      value: nodejs20.x
+    ap-northeast-2:
+      value: nodejs20.x
+    ap-northeast-3:
+      value: nodejs20.x
+    ap-south-1:
+      value: nodejs20.x
+    ap-south-2:
+      value: nodejs20.x
+    ap-southeast-1:
+      value: nodejs20.x
+    ap-southeast-2:
+      value: nodejs20.x
+    ap-southeast-3:
+      value: nodejs20.x
+    ap-southeast-4:
+      value: nodejs20.x
+    ap-southeast-5:
+      value: nodejs20.x
+    ap-southeast-7:
+      value: nodejs20.x
+    ca-central-1:
+      value: nodejs20.x
+    ca-west-1:
+      value: nodejs20.x
+    cn-north-1:
+      value: nodejs18.x
+    cn-northwest-1:
+      value: nodejs18.x
+    eu-central-1:
+      value: nodejs20.x
+    eu-central-2:
+      value: nodejs20.x
+    eu-north-1:
+      value: nodejs20.x
+    eu-south-1:
+      value: nodejs20.x
+    eu-south-2:
+      value: nodejs20.x
+    eu-west-1:
+      value: nodejs20.x
+    eu-west-2:
+      value: nodejs20.x
+    eu-west-3:
+      value: nodejs20.x
+    il-central-1:
+      value: nodejs20.x
+    me-central-1:
+      value: nodejs20.x
+    me-south-1:
+      value: nodejs20.x
+    mx-central-1:
+      value: nodejs20.x
+    sa-east-1:
+      value: nodejs20.x
+    us-east-1:
+      value: nodejs20.x
+    us-east-2:
+      value: nodejs20.x
+    us-west-1:
+      value: nodejs20.x
+    us-west-2:
+      value: nodejs20.x
+Outputs:
+  VPCIdOutput:
+    Value:
+      Ref: myVPC01512990
+    Export:
+      Name: VpcId
+  PublicSubnetOutput0:
+    Value:
+      Ref: myVPCpublicsubnet1Subnet1SubnetF979D130
+    Export:
+      Name: PublicSubnet-0
+  PublicSubnetOutput1:
+    Value:
+      Ref: myVPCpublicsubnet1Subnet2Subnet9D46C69E
+    Export:
+      Name: PublicSubnet-1
+  PublicSubnetOutput2:
+    Value:
+      Ref: myVPCpublicsubnet2Subnet1Subnet46D7E973
+    Export:
+      Name: PublicSubnet-2
+  PublicSubnetOutput3:
+    Value:
+      Ref: myVPCpublicsubnet2Subnet2SubnetB0CEA5A0
+    Export:
+      Name: PublicSubnet-3
+  PrivateSubnetOutput0:
+    Value:
+      Ref: myVPCprivatesubnet1Subnet1Subnet4FD292CB
+    Export:
+      Name: PrivateSubnet-0
+  PrivateSubnetOutput1:
+    Value:
+      Ref: myVPCprivatesubnet1Subnet2Subnet5365E391
+    Export:
+      Name: PrivateSubnet-1
+  PrivateSubnetOutput2:
+    Value:
+      Ref: myVPCprivatesubnet2Subnet1SubnetA7160C7F
+    Export:
+      Name: PrivateSubnet-2
+  PrivateSubnetOutput3:
+    Value:
+      Ref: myVPCprivatesubnet2Subnet2Subnet0F84807C
+    Export:
+      Name: PrivateSubnet-3
+Conditions:
+  CDKMetadataAvailable:
+    Fn::Or:
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - af-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-3
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-south-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-3
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-4
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ca-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ca-west-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - cn-north-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - cn-northwest-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-central-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-north-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-south-2
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-3
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - il-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - me-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - me-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - sa-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-east-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-west-1
+      - Fn::Equals:
+          - Ref: AWS::Region
+          - us-west-2
+Parameters:
+  BootstrapVersion:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /cdk-bootstrap/hnb659fds/version
+    Description: Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]
+
