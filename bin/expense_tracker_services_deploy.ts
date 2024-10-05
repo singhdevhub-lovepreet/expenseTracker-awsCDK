@@ -2,9 +2,10 @@
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { ExpenseTrackerServicesDeployStack } from '../lib/expense_tracker_services_deploy-stack';
+import { ExpenseTrackerServices } from '../lib/expense_services-stack';
 
 const app = new cdk.App();
-new ExpenseTrackerServicesDeployStack(app, 'ExpenseTrackerServicesDeployStack', {
+const vpcStack = new ExpenseTrackerServicesDeployStack(app, 'ExpenseTrackerServicesDeployStack', {
   /* If you don't specify 'env', this stack will be environment-agnostic.
    * Account/Region-dependent features and context lookups will not work,
    * but a single synthesized template can be deployed anywhere. */
@@ -19,3 +20,9 @@ new ExpenseTrackerServicesDeployStack(app, 'ExpenseTrackerServicesDeployStack', 
 
   /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
 });
+
+const mysqlAndKafkaStack = new ExpenseTrackerServices(app, 'ExpenseTrackerServicesStack', {
+
+});
+
+mysqlAndKafkaStack.addDependency(vpcStack);
