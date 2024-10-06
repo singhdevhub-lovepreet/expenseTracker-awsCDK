@@ -10,13 +10,15 @@ export class ExpenseTrackerServices extends cdk.Stack{
 
         super(scope, id, props);
         
-        const vpc = Vpc.fromLookup(this, 'ImportedVPC', {
-            vpcId: cdk.Fn.importValue('VpcId')
-        })
-        const privateSubnet1 = Subnet.fromSubnetId(this, 'PrivateSubnet1', cdk.Fn.importValue('PrivateSubnet-0'));
-        const privateSubnet2 = Subnet.fromSubnetId(this, 'PrivateSubnet2', cdk.Fn.importValue('PrivateSubnet-1'));
-        const publicSubnet1 = Subnet.fromSubnetId(this, 'PublicSubnet1', cdk.Fn.importValue('PublicSubnet-0'));
-        const publicSubnet2 = Subnet.fromSubnetId(this, 'PublicSubnet2', cdk.Fn.importValue('PublicSubnet-1'));
+        const vpcId = cdk.aws_ssm.StringParameter.valueFromLookup(this, 'VpcId');
+        const vpc = Vpc.fromLookup(this, "VpcImported", {
+            vpcId: vpcId
+        });
+
+        const privateSubnet1 = Subnet.fromSubnetId(this, 'PrivateSubnet1', cdk.aws_ssm.StringParameter.valueFromLookup(this, 'PrivateSubnet-0'));
+        const privateSubnet2 = Subnet.fromSubnetId(this, 'PrivateSubnet2', cdk.aws_ssm.StringParameter.valueFromLookup(this, 'PrivateSubnet-1'));
+        const publicSubnet1 = Subnet.fromSubnetId(this, 'PublicSubnet1', cdk.aws_ssm.StringParameter.valueFromLookup(this, 'PublicSubnet-0'));
+        const publicSubnet2 = Subnet.fromSubnetId(this, 'PublicSubnet2', cdk.aws_ssm.StringParameter.valueFromLookup(this, 'PublicSubnet-1'));
 
         const dbSecurityGroup = new SecurityGroup(this, 'DbSecurityGroup', {
             vpc,
@@ -45,7 +47,10 @@ export class ExpenseTrackerServices extends cdk.Stack{
             portMappings: [{containerPort: 3306}],
         });
 
-        const kafkaTaskDefination = new FargateTaskDefinition(this, 'KafkaTaskDef');
+        const kafkaTaskDefination = new FargateTaskDefinition(this, 'KafkaTaskDef', {
+            memoryLimitMiB: 1024,
+            cpu: 512,
+        });
 
         kafkaTaskDefination.addContainer('ZookeeperContainer', {
             image: ContainerImage.fromRegistry('confluentinc/cp-zookeeper:7.4.4'),
