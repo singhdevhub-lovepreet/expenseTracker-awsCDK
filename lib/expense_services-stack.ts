@@ -25,7 +25,12 @@ export class ExpenseTrackerServices extends cdk.Stack {
         dbSecurityGroup.addIngressRule(Peer.ipv4(vpc.vpcCidrBlock), Port.tcp(9092), 'Allow Kafka traffic');
         dbSecurityGroup.addIngressRule(Peer.ipv4(vpc.vpcCidrBlock), Port.tcp(2181), 'Allow Kafka to access Zookeeper');
 
-        const cluster = new Cluster(this, 'DatabaseKafkaCluster', { vpc });
+        const cluster = new Cluster(this, 'DatabaseKafkaCluster', {
+            vpc,
+            defaultCloudMapNamespace: {
+                name: 'local',
+            },
+        });
 
         const nlb = new NetworkLoadBalancer(this, 'DatabaseNLB', {
             vpc,
@@ -77,8 +82,8 @@ export class ExpenseTrackerServices extends cdk.Stack {
         kafkaTaskDefination.addContainer('KafkaContainer', {
             image: ContainerImage.fromRegistry('confluentinc/cp-kafka:7.4.4'),
             environment: {
-                KAFKA_BROKER_ID: `${cdk.Aws.STACK_NAME}-${cdk.Aws.REGION}`,
-                KAFKA_ZOOKEEPER_CONNECT: 'zookeeper-service:2181',
+                KAFKA_BROKER_ID: "1",
+                KAFKA_ZOOKEEPER_CONNECT: 'zookeeper-service.local:2181',
                 KAFKA_ADVERTISED_LISTENERS: `PLAINTEXT://${nlb.loadBalancerDnsName}:9092`,
                 KAFKA_LISTENERS: 'PLAINTEXT://:9092',
                 KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'PLAINTEXT:PLAINTEXT',
@@ -107,6 +112,9 @@ export class ExpenseTrackerServices extends cdk.Stack {
             desiredCount: 3,
             securityGroups: [dbSecurityGroup],
             vpcSubnets: { subnets: [privateSubnet1, privateSubnet2] },
+            cloudMapOptions: {
+                name: 'zookeeper-service'
+            },
         });
 
         const kafkaService = new FargateService(this, 'KafkaService', {
