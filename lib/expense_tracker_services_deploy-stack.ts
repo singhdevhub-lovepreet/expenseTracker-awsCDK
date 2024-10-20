@@ -81,5 +81,11 @@ export class ExpenseTrackerServicesDeployStack extends cdk.Stack {
         stringValue: subnet.subnetId
       })
     }) 
+
+    new cdk.aws_ssm.StringParameter(this, `ExpenseTrackerServicesNLB`, {
+      parameterName: `ExpenseTrackerServicesNLB`,
+      stringValue: ""
+    })
+
   }
 }
