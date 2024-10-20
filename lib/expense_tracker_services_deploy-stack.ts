@@ -82,10 +82,5 @@ export class ExpenseTrackerServicesDeployStack extends cdk.Stack {
       })
     }) 
 
-    new cdk.aws_ssm.StringParameter(this, `ExpenseTrackerServicesNLB`, {
-      parameterName: `ExpenseTrackerServicesNLB`,
-      stringValue: ""
-    })
-
   }
 }
