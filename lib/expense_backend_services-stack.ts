@@ -18,12 +18,7 @@ export class ExpenseBackendServices extends cdk.Stack {
         const privateSubnet1 = Subnet.fromSubnetId(this, 'PrivateSubnet1', cdk.aws_ssm.StringParameter.valueFromLookup(this, 'PrivateSubnet-0'));
         const privateSubnet2 = Subnet.fromSubnetId(this, 'PrivateSubnet2', cdk.aws_ssm.StringParameter.valueFromLookup(this, 'PrivateSubnet-1'));
 
-        let nlbDnsName:string = "";
-        try {
-            nlbDnsName = cdk.aws_ssm.StringParameter.valueFromLookup(this, "ExpenseTrackerServicesNLB");
-        } catch (error) {
-            console.error('SSM parameter not found:', error);
-        }
+        const nlbDnsName = cdk.aws_ssm.StringParameter.valueFromLookup(this, "ExpenseTrackerServicesNLB");
 
         const servicesSecurityGroup = new SecurityGroup(this, 'BackendServicesSecurityGroup', {
             vpc,
