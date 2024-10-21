@@ -5,6 +5,7 @@ import * as assets from 'aws-cdk-lib/aws-ecr-assets';
 import * as path from "path";
 import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 
 export class ExpenseBackendServices extends cdk.Stack {
    
@@ -34,14 +35,15 @@ export class ExpenseBackendServices extends cdk.Stack {
         })
 
         const authServiceTaskDef = new ecs.FargateTaskDefinition(this, 'AuthServiceTaskDef', {
-            memoryLimitMiB: 512,
-            cpu: 256,
+            memoryLimitMiB: 1024,
+            cpu: 512,
         });
 
         authServiceTaskDef.addContainer('AuthServiceContainer', {
             image: ecs.ContainerImage.fromDockerImageAsset(authServiceImage),
             logging: ecs.LogDrivers.awsLogs({
-                streamPrefix: "AuthService"
+                streamPrefix: "AuthService",
+                logRetention: RetentionDays.ONE_WEEK 
             }),
             portMappings: [{containerPort: 9898}],
             environment: {
