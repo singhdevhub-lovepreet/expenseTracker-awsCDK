@@ -97,3 +97,40 @@ export class ExpenseBackendServices extends cdk.Stack {
 
 
 }
+
+/* solve using these commands when getting:- must use ASL logging (which requires CGO) if running as root
+then use these commands:-
+
+brew install docker-credential-helper-ecr
+brew install docker-credential-helper
+
+cat > ~/.docker/config.json << EOF
+{
+  "credsStore": "osxkeychain",
+  "credHelpers": {
+    "060795936197.dkr.ecr.ap-south-1.amazonaws.com": "ecr-login"
+  }
+}
+EOF
+
+chmod 600 ~/.docker/config.json
+
+docker logout
+docker logout 060795936197.dkr.ecr.ap-south-1.amazonaws.com
+
+sudo aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 060795936197.dkr.ecr.ap-south-1.amazonaws.com
+
+cat > ~/.docker/config.json << EOF
+{
+  "auths": {
+    "060795936197.dkr.ecr.ap-south-1.amazonaws.com": {}
+  },
+  "credStore": "osxkeychain",
+  "credHelpers": {
+    "public.ecr.aws": "ecr-login",
+    "060795936197.dkr.ecr.ap-south-1.amazonaws.com": "ecr-login"
+  }
+}
+EOF
+
+*/
