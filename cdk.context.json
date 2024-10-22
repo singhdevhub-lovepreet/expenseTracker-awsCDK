@@ -1,0 +1,55 @@
+{
+  "availability-zones:account=060795936197:region=ap-south-1": [
+    "ap-south-1a",
+    "ap-south-1b",
+    "ap-south-1c"
+  ],
+  "ssm:account=060795936197:parameterName=VpcId:region=ap-south-1": "vpc-004dbf238ecb13dde",
+  "ssm:account=060795936197:parameterName=PrivateSubnet-0:region=ap-south-1": "subnet-0ae71ac3d4ede29f1",
+  "ssm:account=060795936197:parameterName=PrivateSubnet-1:region=ap-south-1": "subnet-0a7f244eb24b943e7",
+  "vpc-provider:account=060795936197:filter.vpc-id=vpc-004dbf238ecb13dde:region=ap-south-1:returnAsymmetricSubnets=true": {
+    "vpcId": "vpc-004dbf238ecb13dde",
+    "vpcCidrBlock": "10.0.0.0/16",
+    "ownerAccountId": "060795936197",
+    "availabilityZones": [],
+    "subnetGroups": [
+      {
+        "name": "public-subnet",
+        "type": "Public",
+        "subnets": [
+          {
+            "subnetId": "subnet-05b77e31edfcd56dc",
+            "cidr": "10.0.0.0/24",
+            "availabilityZone": "ap-south-1a",
+            "routeTableId": "rtb-0d216598b247bf496"
+          },
+          {
+            "subnetId": "subnet-0f3616a3a756e46a1",
+            "cidr": "10.0.1.0/24",
+            "availabilityZone": "ap-south-1b",
+            "routeTableId": "rtb-05b6ac04064dd5a5f"
+          }
+        ]
+      },
+      {
+        "name": "private-subnet",
+        "type": "Private",
+        "subnets": [
+          {
+            "subnetId": "subnet-0ae71ac3d4ede29f1",
+            "cidr": "10.0.2.0/24",
+            "availabilityZone": "ap-south-1a",
+            "routeTableId": "rtb-04ab14e3490cba106"
+          },
+          {
+            "subnetId": "subnet-0a7f244eb24b943e7",
+            "cidr": "10.0.3.0/24",
+            "availabilityZone": "ap-south-1b",
+            "routeTableId": "rtb-038a78cdd115e680f"
+          }
+        ]
+      }
+    ]
+  },
+  "ssm:account=060795936197:parameterName=ExpenseTrackerServicesNLB:region=ap-south-1": "Expens-Datab-gbkJ7T8QpsTN-aff1a0aa37b8efcb.elb.ap-south-1.amazonaws.com"
+}

@@ -63,23 +63,24 @@ export class ExpenseTrackerServicesDeployStack extends cdk.Stack {
       });
     });
 
-    new cdk.CfnOutput(this, 'VPCIdOutput', {
-      value: vpc.vpcId,
-      exportName: 'VpcId'
+    new cdk.aws_ssm.StringParameter(this, 'VpcIdExport', {
+      parameterName: 'VpcId',
+      stringValue: vpc.vpcId
     })
-
+    
     vpc.publicSubnets.forEach((subnet, index)=> {
-      new cdk.CfnOutput(this, `PublicSubnetOutput-${index}`, {
-        value: subnet.subnetId,
-        exportName: `PublicSubnet-${index}`
-      });
+      new cdk.aws_ssm.StringParameter(this, `PublicSubnetExport-${index}`, {
+        parameterName: `PublicSubnet-${index}`,
+        stringValue: subnet.subnetId
+      })
     })
 
     vpc.privateSubnets.forEach((subnet, index)=> {
-      new cdk.CfnOutput(this, `PrivateSubnetOutput-${index}`, {
-        value: subnet.subnetId,
-        exportName: `PrivateSubnet-${index}`
-      });
+      new cdk.aws_ssm.StringParameter(this, `PrivateSubnetExport-${index}`, {
+        parameterName: `PrivateSubnet-${index}`,
+        stringValue: subnet.subnetId
+      })
     }) 
+
   }
 }

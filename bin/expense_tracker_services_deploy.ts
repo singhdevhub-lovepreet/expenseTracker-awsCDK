@@ -2,20 +2,27 @@
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { ExpenseTrackerServicesDeployStack } from '../lib/expense_tracker_services_deploy-stack';
+import { ExpenseTrackerServices } from '../lib/expense_services-stack';
+import { ExpenseBackendServices } from '../lib/expense_backend_services-stack';
 
 const app = new cdk.App();
-new ExpenseTrackerServicesDeployStack(app, 'ExpenseTrackerServicesDeployStack', {
-  /* If you don't specify 'env', this stack will be environment-agnostic.
-   * Account/Region-dependent features and context lookups will not work,
-   * but a single synthesized template can be deployed anywhere. */
 
-  /* Uncomment the next line to specialize this stack for the AWS Account
-   * and Region that are implied by the current CLI configuration. */
-  // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+// Define the AWS environment
+const env = {
+  account: process.env.CDK_DEFAULT_ACCOUNT,
+  region: process.env.CDK_DEFAULT_REGION,
+};
 
-  /* Uncomment the next line if you know exactly what Account and Region you
-   * want to deploy the stack to. */
-  // env: { account: '123456789012', region: 'us-east-1' },
-
-  /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
+// Deploy VPC stack
+const vpcStack = new ExpenseTrackerServicesDeployStack(app, 'ExpenseTrackerServicesDeployStack', {
+  env,  // Infra Stack
 });
+
+// Deploy MySQL and Kafka stack
+const mysqlAndKafkaStack = new ExpenseTrackerServices(app, 'ExpenseTrackerServicesStack', {
+  env,  // Expense Tracker deps 
+});
+
+const backendServices = new ExpenseBackendServices(app, 'ExpenseBackendServices', {
+  env // Expense tracker backend services
+})
