@@ -81,5 +81,6 @@ export class ExpenseTrackerServicesDeployStack extends cdk.Stack {
         stringValue: subnet.subnetId
       })
     }) 
+
   }
 }

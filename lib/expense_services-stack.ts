@@ -155,10 +155,11 @@ export class ExpenseTrackerServices extends cdk.Stack {
             defaultTargetGroups: [kafkaTargetGroup],
         });
 
-        // Output the NLB DNS name
-        new cdk.CfnOutput(this, 'NLBDNSName', {
-            value: nlb.loadBalancerDnsName,
-            description: 'Network Load Balancer DNS Name',
-        });
+        
+        new cdk.aws_ssm.StringParameter(this, `ExpenseTrackerServicesNLB`, {
+            parameterName: `ExpenseTrackerServicesNLB`,
+            stringValue: nlb.loadBalancerDnsName
+        })
+        
     }
 }

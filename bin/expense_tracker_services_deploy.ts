@@ -3,6 +3,7 @@ import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { ExpenseTrackerServicesDeployStack } from '../lib/expense_tracker_services_deploy-stack';
 import { ExpenseTrackerServices } from '../lib/expense_services-stack';
+import { ExpenseBackendServices } from '../lib/expense_backend_services-stack';
 
 const app = new cdk.App();
 
@@ -14,12 +15,14 @@ const env = {
 
 // Deploy VPC stack
 const vpcStack = new ExpenseTrackerServicesDeployStack(app, 'ExpenseTrackerServicesDeployStack', {
-  env,  // Pass the environment configuration
+  env,  // Infra Stack
 });
 
 // Deploy MySQL and Kafka stack
 const mysqlAndKafkaStack = new ExpenseTrackerServices(app, 'ExpenseTrackerServicesStack', {
-  env,  // Pass the environment configuration
+  env,  // Expense Tracker deps 
 });
 
-mysqlAndKafkaStack.addDependency(vpcStack);
+const backendServices = new ExpenseBackendServices(app, 'ExpenseBackendServices', {
+  env // Expense tracker backend services
+})
