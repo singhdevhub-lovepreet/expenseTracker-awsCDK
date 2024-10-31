@@ -104,6 +104,7 @@ export class ExpenseTrackerServices extends cdk.Stack {
             desiredCount: 1,
             securityGroups: [dbSecurityGroup],
             vpcSubnets: { subnets: [privateSubnet1, privateSubnet2] },
+            enableExecuteCommand: true,
         });
 
         const zookeeperService = new FargateService(this, 'ZookeeperService', {
@@ -163,3 +164,27 @@ export class ExpenseTrackerServices extends cdk.Stack {
         
     }
 }
+
+
+
+// Creating MySQL Database in ECS Task via AWS CLI
+
+/*
+aws ecs list-tasks --cluster <cluster-name> --service-name <mysql-service-name>
+
+aws ecs execute-command \
+    --cluster <cluster-name> \
+    --task <task-id> \
+    --container MySQLContainer \
+    --command "/bin/sh" \
+    --interactive
+
+
+mysql -u root -p
+
+CREATE DATABASE my_database;
+
+// Install session-manager-plugin is not installed
+// interactive with AWS ECS Task is only possible when interactive mode flag is on in Fargate ECS Service
+
+*/

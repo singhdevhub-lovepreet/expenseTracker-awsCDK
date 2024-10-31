@@ -63,7 +63,8 @@ export class ExpenseBackendServices extends cdk.Stack {
             desiredCount: 1,
             securityGroups: [servicesSecurityGroup],
             vpcSubnets: {subnets: [privateSubnet1, privateSubnet2]},
-            assignPublicIp: false
+            assignPublicIp: false,
+            enableExecuteCommand: true,
         });
 
         const authServiceAlb = new elbv2.ApplicationLoadBalancer(this, 'AuthServiceALB', {
