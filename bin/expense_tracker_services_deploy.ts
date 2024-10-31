@@ -26,3 +26,5 @@ const mysqlAndKafkaStack = new ExpenseTrackerServices(app, 'ExpenseTrackerServic
 const backendServices = new ExpenseBackendServices(app, 'ExpenseBackendServices', {
   env // Expense tracker backend services
 })
+
+backendServices.addDependency(mysqlAndKafkaStack);

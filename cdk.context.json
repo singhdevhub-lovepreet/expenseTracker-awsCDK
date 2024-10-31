@@ -51,5 +51,5 @@
       }
     ]
   },
-  "ssm:account=060795936197:parameterName=ExpenseTrackerServicesNLB:region=ap-south-1": "Expens-Datab-pUMs2VnxvmcM-39463d74e4b3ed38.elb.ap-south-1.amazonaws.com"
+  "ssm:account=060795936197:parameterName=ExpenseTrackerServicesNLB:region=ap-south-1": "Expens-Datab-giaDuGexoGkL-327485e7993d40b3.elb.ap-south-1.amazonaws.com"
 }

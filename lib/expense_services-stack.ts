@@ -183,7 +183,8 @@ aws ecs execute-command \
 mysql -u root -p
 
 CREATE DATABASE my_database;
-
+GRANT ALL PRIVILEGES ON authservice.* TO 'user'@'%';
+FLUSH PRIVILEGES;
 // Install session-manager-plugin is not installed
 // interactive with AWS ECS Task is only possible when interactive mode flag is on in Fargate ECS Service
 

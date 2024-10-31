@@ -54,7 +54,7 @@ export class ExpenseBackendServices extends cdk.Stack {
                 MYSQL_PASSWORD: 'password',
                 KAFKA_HOST: nlbDnsName,
                 KAFKA_PORT: '9092'
-            }
+            },
         });
 
         const authFargateService = new ecs.FargateService(this, 'AuthService', {
@@ -80,7 +80,11 @@ export class ExpenseBackendServices extends cdk.Stack {
             targetType: elbv2.TargetType.IP,
             healthCheck: {
                 path: '/health',
-                interval: cdk.Duration.seconds(60)
+                interval: cdk.Duration.seconds(60),
+                timeout: cdk.Duration.seconds(30),
+                healthyThresholdCount: 2,
+                unhealthyThresholdCount: 3,
+                healthyHttpCodes: '200-299'
             }
         })
 
