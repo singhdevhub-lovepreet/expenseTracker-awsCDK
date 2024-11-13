@@ -6,6 +6,8 @@ import * as path from "path";
 import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
+import * as servicediscovery from 'aws-cdk-lib/aws-servicediscovery';
+import * as ec2 from "aws-cdk-lib/aws-ec2"
 
 export class ExpenseBackendServices extends cdk.Stack {
    
@@ -16,8 +18,16 @@ export class ExpenseBackendServices extends cdk.Stack {
             vpcId: cdk.aws_ssm.StringParameter.valueFromLookup(this, 'VpcId')
         });
 
+        const namespace = new servicediscovery.PrivateDnsNamespace(this, 'BackendNamespace', {
+            name: 'local',
+            vpc,
+            description: "namespace for expense backend services"
+        });
+
         const privateSubnet1 = Subnet.fromSubnetId(this, 'PrivateSubnet1', cdk.aws_ssm.StringParameter.valueFromLookup(this, 'PrivateSubnet-0'));
         const privateSubnet2 = Subnet.fromSubnetId(this, 'PrivateSubnet2', cdk.aws_ssm.StringParameter.valueFromLookup(this, 'PrivateSubnet-1'));
+        const publicSubnet1 = Subnet.fromSubnetId(this, 'PublicSubnet1', cdk.aws_ssm.StringParameter.valueFromLookup(this, 'PublicSubnet-0'));
+        const publicSubnet2 = Subnet.fromSubnetId(this, 'PublicSubnet2', cdk.aws_ssm.StringParameter.valueFromLookup(this, 'PublicSubnet-1'));
 
         const nlbDnsName = cdk.aws_ssm.StringParameter.valueFromLookup(this, "ExpenseTrackerServicesNLB");
 
@@ -30,6 +40,10 @@ export class ExpenseBackendServices extends cdk.Stack {
             directory: path.join(__dirname, '..', '..', 'backend_services', 'authservice'),
         });
 
+        const kongServiceImage = new assets.DockerImageAsset(this, "KongServiceImage", {
+            directory: path.join(__dirname, "..", "..", "expenseTrackerAppDeps", "kong")
+        });
+
         const cluster = new ecs.Cluster(this, 'ExpenseBackendCluster', {
             vpc: vpc
         })
@@ -37,6 +51,11 @@ export class ExpenseBackendServices extends cdk.Stack {
         const authServiceTaskDef = new ecs.FargateTaskDefinition(this, 'AuthServiceTaskDef', {
             memoryLimitMiB: 1024,
             cpu: 512,
+        });
+
+        const kongServiceTaskDef = new ecs.FargateTaskDefinition(this, 'KongServiceTaskDef', {
+            memoryLimitMiB: 512,
+            cpu: 256
         });
 
         authServiceTaskDef.addContainer('AuthServiceContainer', {
@@ -57,6 +76,79 @@ export class ExpenseBackendServices extends cdk.Stack {
             },
         });
 
+        kongServiceTaskDef.addContainer('KongServiceContainer', {
+            image: ecs.ContainerImage.fromDockerImageAsset(kongServiceImage),
+            logging: ecs.LogDriver.awsLogs({
+                streamPrefix: "KongService",
+                logRetention: RetentionDays.ONE_WEEK
+            })
+        });
+
+        const kongSecurityGroup = new SecurityGroup(this, "KongSecurityGroup", {
+            vpc,
+            allowAllOutbound: true,
+            description: "Security Group for Kong"
+         });
+        
+        kongSecurityGroup.addEgressRule(
+            servicesSecurityGroup,
+            ec2.Port.tcp(9898),
+            'Allow Kong to access Auth Service'
+        );
+
+        servicesSecurityGroup.addIngressRule(
+            kongSecurityGroup,
+            ec2.Port.tcp(9898),
+            'Allow traffic from Kong to Auth Service'
+        )
+        
+        const kongFargateService = new ecs.FargateService(this, 'KongFargateService', {
+            cluster: cluster,
+            taskDefinition: kongServiceTaskDef,
+            desiredCount: 1,
+            securityGroups: [kongSecurityGroup],
+            vpcSubnets: {
+                subnets: [publicSubnet1, publicSubnet2]
+            },
+            assignPublicIp: true,
+            cloudMapOptions: {
+                name: 'kong',
+                cloudMapNamespace: namespace,
+                dnsRecordType: servicediscovery.DnsRecordType.A,
+                dnsTtl: cdk.Duration.seconds(60)
+            }
+        });     
+
+        
+        const kongALB = new elbv2.ApplicationLoadBalancer(this, 'KongALB', {
+            vpc, 
+            internetFacing: true,
+            vpcSubnets: {subnets: [publicSubnet1, publicSubnet2]}
+        });
+
+        const kongTargetGroup = new elbv2.ApplicationTargetGroup(this, 'KongTargetGroup', {
+            vpc,
+            port: 8000,
+            protocol: elbv2.ApplicationProtocol.HTTP,
+            targetType: elbv2.TargetType.IP,
+            healthCheck: {
+                path: '/status',
+                interval: cdk.Duration.seconds(30),
+                timeout: cdk.Duration.seconds(5)
+            }
+        });
+
+        kongTargetGroup.addTarget(kongFargateService);
+        const kongListener = kongALB.addListener('KongListener', {
+            port: 80,
+            defaultTargetGroups: [kongTargetGroup]
+        });
+
+        new cdk.CfnOutput(this, 'KongEndpoint', {
+            value: kongALB.loadBalancerDnsName,
+            description: 'Kong API Gateway endpoint'
+        });
+
         const authFargateService = new ecs.FargateService(this, 'AuthService', {
             cluster: cluster,
             taskDefinition: authServiceTaskDef,
@@ -65,6 +157,12 @@ export class ExpenseBackendServices extends cdk.Stack {
             vpcSubnets: {subnets: [privateSubnet1, privateSubnet2]},
             assignPublicIp: false,
             enableExecuteCommand: true,
+            cloudMapOptions: {
+                name: 'auth-service',
+                cloudMapNamespace: namespace,
+                dnsRecordType: servicediscovery.DnsRecordType.A,
+                dnsTtl: cdk.Duration.seconds(60)
+            }
         });
 
         const authServiceAlb = new elbv2.ApplicationLoadBalancer(this, 'AuthServiceALB', {
@@ -93,12 +191,9 @@ export class ExpenseBackendServices extends cdk.Stack {
         const listener = authServiceAlb.addListener('AuthServiceListener', {
             port: 80,
             defaultTargetGroups: [authServiceTargetGroup]
-        })
-
-        new cdk.CfnOutput(this, 'AuthServiceALBDNS', {
-            value: authServiceAlb.loadBalancerDnsName,
-            description: 'Auth Service ALB DNS Name',
         });
+        
+        
 
     } 
 
