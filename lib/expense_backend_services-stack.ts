@@ -19,7 +19,7 @@ export class ExpenseBackendServices extends cdk.Stack {
         });
 
         const namespace = new servicediscovery.PrivateDnsNamespace(this, 'BackendNamespace', {
-            name: 'local',
+            name: 'public',
             vpc,
             description: "namespace for expense backend services"
         });
@@ -41,7 +41,15 @@ export class ExpenseBackendServices extends cdk.Stack {
         });
 
         const kongServiceImage = new assets.DockerImageAsset(this, "KongServiceImage", {
-            directory: path.join(__dirname, "..", "..", "expenseTrackerAppDeps", "kong")
+            directory: path.join(__dirname, "..", "..", "expenseTrackerAppDeps", "kong"),
+            platform: assets.Platform.LINUX_AMD64,
+            buildArgs: {
+                BUILDKIT_INLINE_CACHE: "1"
+            },
+            invalidation: {
+                buildArgs: true,
+            },
+            file: 'Dockerfile'
         });
 
         const cluster = new ecs.Cluster(this, 'ExpenseBackendCluster', {
@@ -64,7 +72,6 @@ export class ExpenseBackendServices extends cdk.Stack {
                 streamPrefix: "AuthService",
                 logRetention: RetentionDays.ONE_WEEK 
             }),
-            portMappings: [{containerPort: 9898}],
             environment: {
                 MYSQL_HOST: nlbDnsName,
                 MYSQL_PORT: '3306',
@@ -74,6 +81,7 @@ export class ExpenseBackendServices extends cdk.Stack {
                 KAFKA_HOST: nlbDnsName,
                 KAFKA_PORT: '9092'
             },
+            portMappings: [{containerPort: 9898}],
         });
 
         kongServiceTaskDef.addContainer('KongServiceContainer', {
@@ -81,7 +89,11 @@ export class ExpenseBackendServices extends cdk.Stack {
             logging: ecs.LogDriver.awsLogs({
                 streamPrefix: "KongService",
                 logRetention: RetentionDays.ONE_WEEK
-            })
+            }),
+            portMappings: [
+                { containerPort: 8000 }, // Kong proxy port
+                { containerPort: 8001 }  // Kong admin API port
+            ]
         });
 
         const kongSecurityGroup = new SecurityGroup(this, "KongSecurityGroup", {
@@ -134,7 +146,10 @@ export class ExpenseBackendServices extends cdk.Stack {
             healthCheck: {
                 path: '/status',
                 interval: cdk.Duration.seconds(30),
-                timeout: cdk.Duration.seconds(5)
+                timeout: cdk.Duration.seconds(5),
+                healthyThresholdCount: 2,
+                unhealthyThresholdCount: 3,
+                healthyHttpCodes: "200-299"
             }
         });
 
@@ -234,5 +249,20 @@ cat > ~/.docker/config.json << EOF
   }
 }
 EOF
+
+-------------------------
+
+If you are working on Mac with arm processors, you have to make sure architecture mutli support is there
+```bash
+export DOCKER_BUILDKIT=1
+
+# Set up multi-architecture support
+docker run --privileged --rm tonistiigi/binfmt --install all
+docker buildx create --use
+```
+
+in dockerfile include:- 
+
+FROM --platform=linux/amd64 kong:latest AS builder
 
 */
