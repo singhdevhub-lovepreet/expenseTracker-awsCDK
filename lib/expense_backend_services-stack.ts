@@ -45,11 +45,11 @@ export class ExpenseBackendServices extends cdk.Stack {
         });
 
         const expenseServiceImage = new assets.DockerImageAsset(this, 'expenseServiceImage', {
-            directory: path.join(__dirname, '..', '..', 'expenseservice') 
+            directory: path.join(__dirname, '..', '..', 'backend_services', 'expenseservice') 
         });
 
         const dsServiceImage = new assets.DockerImageAsset(this, 'dsServiceImage', {
-            directory: path.join(__dirname, '..', '..', 'dsService') 
+            directory: path.join(__dirname, '..', '..', 'backend_services', 'dsService'), 
         });
 
         const kongServiceImage = new assets.DockerImageAsset(this, "KongServiceImage", {
@@ -355,13 +355,39 @@ export class ExpenseBackendServices extends cdk.Stack {
             'Allow Kong to access Auth Service ALB'
         );
 
+        // Add egress rules for direct service ports
+        kongSecurityGroup.addEgressRule(
+            ec2.Peer.ipv4(vpc.vpcCidrBlock),
+            ec2.Port.tcp(9898),
+            'Allow Kong to access Auth Service directly'
+        );
+
+        kongSecurityGroup.addEgressRule(
+            ec2.Peer.ipv4(vpc.vpcCidrBlock),
+            ec2.Port.tcp(9810),
+            'Allow Kong to access User Service directly'
+        );
+
+        kongSecurityGroup.addEgressRule(
+            ec2.Peer.ipv4(vpc.vpcCidrBlock),
+            ec2.Port.tcp(9820),
+            'Allow Kong to access Expense Service directly'
+        );
+
+        kongSecurityGroup.addEgressRule(
+            ec2.Peer.ipv4(vpc.vpcCidrBlock),
+            ec2.Port.tcp(8010),
+            'Allow Kong to access DS Service directly'
+        );
+
         servicesSecurityGroup.addIngressRule(
             kongSecurityGroup,
             ec2.Port.tcp(9898),
             'Allow traffic from Kong to Auth Service'
         );
 
-        authServiceAlb.connections.allowFrom(kongSecurityGroup,
+        authServiceAlb.connections.allowFrom(
+            kongSecurityGroup,
             ec2.Port.tcp(80),
             'Allow traffic from Kong to Auth Service ALB'
         );
@@ -440,15 +466,6 @@ then use these commands:-
 brew install docker-credential-helper-ecr
 brew install docker-credential-helper
 
-cat > ~/.docker/config.json << EOF
-{
-  "credsStore": "osxkeychain",
-  "credHelpers": {
-    "060795936197.dkr.ecr.ap-south-1.amazonaws.com": "ecr-login"
-  }
-}
-EOF
-
 chmod 600 ~/.docker/config.json
 
 docker logout
@@ -461,11 +478,7 @@ cat > ~/.docker/config.json << EOF
   "auths": {
     "060795936197.dkr.ecr.ap-south-1.amazonaws.com": {}
   },
-  "credStore": "osxkeychain",
-  "credHelpers": {
-    "public.ecr.aws": "ecr-login",
-    "060795936197.dkr.ecr.ap-south-1.amazonaws.com": "ecr-login"
-  }
+  "credStore": "osxkeychain"
 }
 EOF
 
@@ -485,3 +498,6 @@ in dockerfile include:-
 FROM --platform=linux/amd64 kong:latest AS builder
 
 */
+
+
+// TODO: we have to include ALB in kong config instead of direct auth, user service etc
