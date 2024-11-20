@@ -124,6 +124,9 @@ export class ExpenseTrackerServices extends cdk.Stack {
             desiredCount: 3,
             securityGroups: [dbSecurityGroup],
             vpcSubnets: { subnets: [privateSubnet1, privateSubnet2] },
+            cloudMapOptions: {
+                name: 'kafka-service'
+            }
         });
 
         const mysqlTargetGroup = new NetworkTargetGroup(this, 'MySQLTargetGroup', {
