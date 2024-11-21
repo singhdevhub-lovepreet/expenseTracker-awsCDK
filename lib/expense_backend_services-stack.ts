@@ -50,6 +50,14 @@ export class ExpenseBackendServices extends cdk.Stack {
 
         const dsServiceImage = new assets.DockerImageAsset(this, 'dsServiceImage', {
             directory: path.join(__dirname, '..', '..', 'backend_services', 'dsService'), 
+            platform: assets.Platform.LINUX_AMD64,  // Add this line
+            buildArgs: {
+            BUILDKIT_INLINE_CACHE: "1"
+            },
+            invalidation: {
+                buildArgs: true,
+            },
+            file: 'Dockerfile'
         });
 
         const kongServiceImage = new assets.DockerImageAsset(this, "KongServiceImage", {
@@ -499,5 +507,9 @@ FROM --platform=linux/amd64 kong:latest AS builder
 
 */
 
+/*
+mac m1 rossetta error:- https://romanzipp.com/blog/maocs-sequoia-docker-resetta-is-only-intended-to-run-silicon
+disable x86_64 emulation
+*/
 
 // TODO: we have to include ALB in kong config instead of direct auth, user service etc
