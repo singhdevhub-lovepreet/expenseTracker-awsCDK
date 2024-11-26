@@ -178,7 +178,7 @@ export class ExpenseBackendServices extends cdk.Stack {
                 KAFKA_PORT: '9092',
                 OPENAI_API_KEY: 'VKtb8V8Jjj974P1K4RS2vNAvcMaNo6xR'
             },
-            portMappings: [{containerPort: 9820}]
+            portMappings: [{containerPort: 8010}]
         });
 
         const kongSecurityGroup = new SecurityGroup(this, "KongSecurityGroup", {
@@ -311,7 +311,7 @@ export class ExpenseBackendServices extends cdk.Stack {
             protocol: elbv2.ApplicationProtocol.HTTP,
             targetType: elbv2.TargetType.IP,
             healthCheck: {
-                path: '/health',
+                path: '/expense/v1/health',
                 interval: cdk.Duration.seconds(60),
                 timeout: cdk.Duration.seconds(30),
                 healthyThresholdCount: 2,
