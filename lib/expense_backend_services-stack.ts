@@ -35,6 +35,25 @@ export class ExpenseBackendServices extends cdk.Stack {
             vpc,
             allowAllOutbound: true
         });
+        
+        // Add these rules to your servicesSecurityGroup
+        servicesSecurityGroup.addIngressRule(
+            ec2.Peer.ipv4(vpc.vpcCidrBlock),
+            ec2.Port.tcp(9092),
+            'Allow Kafka traffic'
+        );
+
+        servicesSecurityGroup.addEgressRule(
+            ec2.Peer.ipv4(vpc.vpcCidrBlock),
+            ec2.Port.tcp(9092),
+            'Allow outbound Kafka traffic'
+        );
+        
+        servicesSecurityGroup.addEgressRule(
+            ec2.Peer.anyIpv4(),
+            ec2.Port.tcp(443),
+            'Allow HTTPS outbound traffic for Mistral AI API'
+        );
 
         const authServiceImage = new assets.DockerImageAsset(this, 'AuthServiceImage', {
             directory: path.join(__dirname, '..', '..', 'backend_services', 'authservice'),
