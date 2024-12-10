@@ -8,6 +8,8 @@ import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import * as servicediscovery from 'aws-cdk-lib/aws-servicediscovery';
 import * as ec2 from "aws-cdk-lib/aws-ec2"
+import * as route53 from 'aws-cdk-lib/aws-route53';
+import * as route53Targets from 'aws-cdk-lib/aws-route53-targets';
 
 export class ExpenseBackendServices extends cdk.Stack {
    
@@ -18,12 +20,11 @@ export class ExpenseBackendServices extends cdk.Stack {
             vpcId: cdk.aws_ssm.StringParameter.valueFromLookup(this, 'VpcId')
         });
 
-        const namespace = new servicediscovery.PrivateDnsNamespace(this, 'BackendNamespace', {
-            name: 'public',
-            vpc,
-            description: "namespace for expense backend services"
+        const privateHostedZone = new route53.PrivateHostedZone(this, 'PrivateHostedZone', {
+            zoneName: 'public',
+            vpc: vpc
         });
-
+        
         const privateSubnet1 = Subnet.fromSubnetId(this, 'PrivateSubnet1', cdk.aws_ssm.StringParameter.valueFromLookup(this, 'PrivateSubnet-0'));
         const privateSubnet2 = Subnet.fromSubnetId(this, 'PrivateSubnet2', cdk.aws_ssm.StringParameter.valueFromLookup(this, 'PrivateSubnet-1'));
         const publicSubnet1 = Subnet.fromSubnetId(this, 'PublicSubnet1', cdk.aws_ssm.StringParameter.valueFromLookup(this, 'PublicSubnet-0'));
@@ -214,12 +215,6 @@ export class ExpenseBackendServices extends cdk.Stack {
             vpcSubnets: {subnets: [privateSubnet1, privateSubnet2]},
             assignPublicIp: false,
             enableExecuteCommand: true,
-            cloudMapOptions: {
-                name: 'auth-service',
-                cloudMapNamespace: namespace,
-                dnsRecordType: servicediscovery.DnsRecordType.A,
-                dnsTtl: cdk.Duration.seconds(60)
-            }
         });
 
         const userFargateService = new ecs.FargateService(this, "UserFargateService", {
@@ -230,12 +225,6 @@ export class ExpenseBackendServices extends cdk.Stack {
             securityGroups: [servicesSecurityGroup],
             assignPublicIp: false,
             enableExecuteCommand: true,
-            cloudMapOptions: {
-                name: 'user-service',
-                cloudMapNamespace: namespace,
-                dnsRecordType: servicediscovery.DnsRecordType.A,
-                dnsTtl: cdk.Duration.seconds(60)
-            }
         });
 
         const expenseFargateService = new ecs.FargateService(this, "ExpenseFargateService", {
@@ -246,12 +235,6 @@ export class ExpenseBackendServices extends cdk.Stack {
             securityGroups: [servicesSecurityGroup],
             assignPublicIp: false,
             enableExecuteCommand: true,
-            cloudMapOptions: {
-                name: 'expense-service',
-                cloudMapNamespace: namespace,
-                dnsRecordType: servicediscovery.DnsRecordType.A,
-                dnsTtl: cdk.Duration.seconds(60)
-            }
         });
 
         const dsFargateService = new ecs.FargateService(this, "DsFargateService", {
@@ -262,12 +245,6 @@ export class ExpenseBackendServices extends cdk.Stack {
             securityGroups: [servicesSecurityGroup],
             assignPublicIp: false,
             enableExecuteCommand: true,
-            cloudMapOptions: {
-                name: 'ds-service',
-                cloudMapNamespace: namespace,
-                dnsRecordType: servicediscovery.DnsRecordType.A,
-                dnsTtl: cdk.Duration.seconds(60)
-            }
         });
 
         const authServiceAlb = new elbv2.ApplicationLoadBalancer(this, 'AuthServiceALB', {
@@ -376,61 +353,59 @@ export class ExpenseBackendServices extends cdk.Stack {
             defaultTargetGroups: [dsServiceTargetGroup]
         });
 
+        new route53.ARecord(this, 'AuthServiceAlbDnsRecord', {
+            zone: privateHostedZone,
+            recordName: 'auth-service-alb',
+            target: route53.RecordTarget.fromAlias(new route53Targets.LoadBalancerTarget(authServiceAlb))
+        });
+        
+        new route53.ARecord(this, 'UserServiceAlbDnsRecord', {
+            zone: privateHostedZone,
+            recordName: 'user-service-alb',
+            target: route53.RecordTarget.fromAlias(new route53Targets.LoadBalancerTarget(userServiceAlb))
+        });
+        
+        new route53.ARecord(this, 'ExpenseServiceAlbDnsRecord', {
+            zone: privateHostedZone,
+            recordName: 'expense-service-alb',
+            target: route53.RecordTarget.fromAlias(new route53Targets.LoadBalancerTarget(expenseServiceAlb))
+        });
+        
+        new route53.ARecord(this, 'DsServiceAlbDnsRecord', {
+            zone: privateHostedZone,
+            recordName: 'ds-service-alb',
+            target: route53.RecordTarget.fromAlias(new route53Targets.LoadBalancerTarget(dsServiceAlb))
+        });
+
+        // Remove direct service port egress rules and keep only ALB access
         kongSecurityGroup.addEgressRule(
             ec2.Peer.ipv4(vpc.vpcCidrBlock),
             ec2.Port.tcp(80),
-            'Allow Kong to access Auth Service ALB'
+            'Allow Kong to access Service ALBs'
         );
 
-        // Add egress rules for direct service ports
-        kongSecurityGroup.addEgressRule(
-            ec2.Peer.ipv4(vpc.vpcCidrBlock),
-            ec2.Port.tcp(9898),
-            'Allow Kong to access Auth Service directly'
-        );
-
-        kongSecurityGroup.addEgressRule(
-            ec2.Peer.ipv4(vpc.vpcCidrBlock),
-            ec2.Port.tcp(9810),
-            'Allow Kong to access User Service directly'
-        );
-
-        kongSecurityGroup.addEgressRule(
-            ec2.Peer.ipv4(vpc.vpcCidrBlock),
-            ec2.Port.tcp(9820),
-            'Allow Kong to access Expense Service directly'
-        );
-
-        kongSecurityGroup.addEgressRule(
-            ec2.Peer.ipv4(vpc.vpcCidrBlock),
-            ec2.Port.tcp(8010),
-            'Allow Kong to access DS Service directly'
-        );
-
-        servicesSecurityGroup.addIngressRule(
-            kongSecurityGroup,
-            ec2.Port.tcp(9898),
-            'Allow traffic from Kong to Auth Service'
-        );
-
+        // Allow ALB connections from Kong
         authServiceAlb.connections.allowFrom(
             kongSecurityGroup,
             ec2.Port.tcp(80),
             'Allow traffic from Kong to Auth Service ALB'
         );
-        userServiceAlb.connections.allowFrom(kongSecurityGroup,
+        userServiceAlb.connections.allowFrom(
+            kongSecurityGroup,
             ec2.Port.tcp(80),
             'Allow traffic from Kong to User Service ALB'
         );
-        expenseServiceAlb.connections.allowFrom(kongSecurityGroup,
+        expenseServiceAlb.connections.allowFrom(
+            kongSecurityGroup,
             ec2.Port.tcp(80),
             'Allow traffic from Kong to Expense Service ALB'
         );
-        dsServiceAlb.connections.allowFrom(kongSecurityGroup,
+        dsServiceAlb.connections.allowFrom(
+            kongSecurityGroup,
             ec2.Port.tcp(80),
-            'Allow traffic from Kong to Ds Service ALB'
+            'Allow traffic from Kong to DS Service ALB'
         );
-        
+
         const kongFargateService = new ecs.FargateService(this, 'KongFargateService', {
             cluster: cluster,
             taskDefinition: kongServiceTaskDef,
@@ -440,12 +415,6 @@ export class ExpenseBackendServices extends cdk.Stack {
                 subnets: [publicSubnet1, publicSubnet2]
             },
             assignPublicIp: true,
-            cloudMapOptions: {
-                name: 'kong',
-                cloudMapNamespace: namespace,
-                dnsRecordType: servicediscovery.DnsRecordType.A,
-                dnsTtl: cdk.Duration.seconds(60)
-            }
         });     
 
         
