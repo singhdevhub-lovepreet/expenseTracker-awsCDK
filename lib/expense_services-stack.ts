@@ -82,22 +82,18 @@ export class ExpenseTrackerServices extends cdk.Stack {
         kafkaTaskDefination.addContainer('KafkaContainer', {
             image: ContainerImage.fromRegistry('confluentinc/cp-kafka:7.4.4'),
             environment: {
-                KAFKA_BROKER_ID: "1",
+                KAFKA_BROKER_ID: this.node.tryGetContext('brokerId'), 
                 KAFKA_ZOOKEEPER_CONNECT: 'zookeeper-service.local:2181',
-                KAFKA_ADVERTISED_LISTENERS: `PLAINTEXT://${nlb.loadBalancerDnsName}:9092`,
+                KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka-broker:9092',
                 KAFKA_LISTENERS: 'PLAINTEXT://:9092',
                 KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'PLAINTEXT:PLAINTEXT',
                 KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT',
-                // Reduce replication factor to match available brokers
-                KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: '1',  // Changed from 3 to 1
+                KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: '3',
                 KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true',
-                KAFKA_NUM_PARTITIONS: '3',
-                KAFKA_DEFAULT_REPLICATION_FACTOR: '1',  // Changed from 3 to 1
-                // Add these configurations for better cluster formation
-                KAFKA_MIN_INSYNC_REPLICAS: '1',
-                KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE: 'false',
-                // Add this to ensure brokers can find each other
-                KAFKA_BROKER_RACK: 'RACK1' 
+                KAFKA_NUM_PARTITIONS: '1',
+                KAFKA_DEFAULT_REPLICATION_FACTOR: '3',
+                KAFKA_MIN_INSYNC_REPLICAS: '2',
+                KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE: 'false'
             },
             portMappings: [
                 { containerPort: 9092 }],
