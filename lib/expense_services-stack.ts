@@ -88,16 +88,13 @@ export class ExpenseTrackerServices extends cdk.Stack {
                 KAFKA_LISTENERS: 'PLAINTEXT://:9092',
                 KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'PLAINTEXT:PLAINTEXT',
                 KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT',
-                // Reduce replication factor to match available brokers
-                KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: '1',  // Changed from 3 to 1
+                KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: '1',
                 KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true',
                 KAFKA_NUM_PARTITIONS: '3',
-                KAFKA_DEFAULT_REPLICATION_FACTOR: '1',  // Changed from 3 to 1
-                // Add these configurations for better cluster formation
+                KAFKA_DEFAULT_REPLICATION_FACTOR: '1',
                 KAFKA_MIN_INSYNC_REPLICAS: '1',
                 KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE: 'false',
-                // Add this to ensure brokers can find each other
-                KAFKA_BROKER_RACK: 'RACK1' 
+                KAFKA_BROKER_RACK: 'RACK1'
             },
             portMappings: [
                 { containerPort: 9092 }],
